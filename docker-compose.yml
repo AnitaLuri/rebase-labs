@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  app: 
+    container_name: rebase-labs
+    image: ruby
+    working_dir: /app
+    volumes: 
+      - .:/app
+      - rubygems_rebase_labs:/usr/local/bundle
+      - gemconfig:/root/.local/share/gem
+    links:
+      - postgres
+    networks:
+      - rebase-labs
+    ports:
+      - '3000:3000'
+    command: bash -c "bundle && ruby server.rb"
+  postgres:
+    container_name: postgres
+    image: postgres
+    volumes:
+      - pgdata_rebase_labs:/var/lib/postgresql/data
+    environment:
+      POSTGRES_HOST: 'postgres'
+      POSTGRES_HOST_AUTH_METHOD: 'trust'
+      POSTGRES_DB: 'records'
+    networks:
+      - rebase-labs
+  redis:
+    image: redis
+
+volumes:
+  rubygems_rebase_labs:
+  gemconfig:
+  pgdata_rebase_labs:
+networks:
+  rebase-labs: {}

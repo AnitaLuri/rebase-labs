@@ -1,8 +1,17 @@
 require 'sinatra'
 require 'rack/handler/puma'
 require 'csv'
+require 'pg'
+require_relative './import_from_csv.rb'
 
 get '/tests' do
+  Import.new
+  conn = PG.connect(host: 'postgres', dbname: 'postgres', user: 'postgres')
+  tests = conn.exec("SELECT * FROM records ;")
+  tests.map { |t| t }.to_json
+end
+
+get '/csv' do
   rows = CSV.read("./data.csv", col_sep: ';')
 
   columns = rows.shift
@@ -15,8 +24,8 @@ get '/tests' do
   end.to_json
 end
 
-get '/hello' do
-  'Hello world!'
+get '/index' do
+  File.read('./app/index.html')
 end
 
 Rack::Handler::Puma.run(
